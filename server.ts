@@ -18,7 +18,7 @@ import { jsonrepair } from "jsonrepair";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const DEFAULT_DB_PATH = path.join(process.cwd(), "database.json");
 const DB_PATH = process.env.DATABASE_PATH || DEFAULT_DB_PATH;

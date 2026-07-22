@@ -18,7 +18,7 @@ RUN npm run build
 FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8080
 
 # Copia arquivos de dependências e instala apenas dependências de produção
 COPY package*.json ./
@@ -28,8 +28,8 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/database.json ./database.json
 
-# Expõe a porta 3000 (padrão usada no Cloud Run)
-EXPOSE 3000
+# Expõe a porta 8080 (padrão usada no Cloud Run)
+EXPOSE 8080
 
 # Inicia o servidor
 CMD ["npm", "start"]
