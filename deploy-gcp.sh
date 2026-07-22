@@ -123,7 +123,7 @@ if [ -z "$GEMINI_KEY" ]; then
         --region="$REGION" \
         --platform=managed \
         --allow-unauthenticated \
-        --port=3000 \
+        --port=8080 \
         --add-cloudsql-instances="$CONNECTION_NAME" \
         --set-env-vars="DATABASE_URL=$DATABASE_URL,NODE_ENV=production"
 else
@@ -132,7 +132,7 @@ else
         --region="$REGION" \
         --platform=managed \
         --allow-unauthenticated \
-        --port=3000 \
+        --port=8080 \
         --add-cloudsql-instances="$CONNECTION_NAME" \
         --set-env-vars="DATABASE_URL=$DATABASE_URL,GEMINI_API_KEY=$GEMINI_KEY,NODE_ENV=production"
 fi
