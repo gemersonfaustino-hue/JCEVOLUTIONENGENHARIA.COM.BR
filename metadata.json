@@ -1,0 +1,8 @@
+{
+  "name": "Remix: JC EVOLUTION ENGENHARIA MECANICA ",
+  "description": "",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

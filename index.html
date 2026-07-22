@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR" class="notranslate" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <title>JC Evolution Engenharia Mecânica - Laudos, Inspeções e Soluções</title>
+    <script>
+      // Gracefully catch and suppress benign browser extension errors (like MetaMask)
+      // that fail to connect inside the sandboxed AI Studio preview iframe.
+      window.addEventListener('error', function(event) {
+        var msg = event.message || '';
+        if (msg && (
+          msg.indexOf('MetaMask') !== -1 || 
+          msg.indexOf('metamask') !== -1 ||
+          msg.indexOf('ethereum') !== -1 ||
+          msg.indexOf('Failed to connect to MetaMask') !== -1
+        )) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+          return true;
+        }
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = event.reason ? (event.reason.message || event.reason) : '';
+        if (reason && typeof reason === 'string' && (
+          reason.indexOf('MetaMask') !== -1 || 
+          reason.indexOf('metamask') !== -1 ||
+          reason.indexOf('ethereum') !== -1 ||
+          reason.indexOf('Failed to connect to MetaMask') !== -1
+        )) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      }, true);
+    </script>
+  </head>
+  <body>
+    <div id="root" class="notranslate" translate="no"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
