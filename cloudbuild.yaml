@@ -1,13 +1,13 @@
 steps:
-  # 1. Build the Docker image
+  # 1. Build da imagem Docker usando Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA', '.']
 
-  # 2. Push image to Container Registry
+  # 2. Push para o Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA']
+    args: ['push', 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA']
 
-  # 3. Deploy to Cloud Run
+  # 3. Deploy no Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -15,7 +15,7 @@ steps:
       - 'deploy'
       - 'jcevolution-app'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA'
+      - 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA'
       - '--region'
       - 'southamerica-east1'
       - '--platform'
@@ -25,4 +25,5 @@ steps:
       - '8080'
 
 images:
-  - 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA'
+  - 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA'
+  
