@@ -1,29 +1,23 @@
 steps:
-  # 1. Build da imagem Docker usando Artifact Registry
+  # 1. Construir a imagem Docker
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'southamerica-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/app:$COMMIT_SHA', '.']
 
-  # 2. Push para o Artifact Registry
+  # 2. Enviar a imagem para o Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA']
+    args: ['push', 'southamerica-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/app:$COMMIT_SHA']
 
-  # 3. Deploy no Cloud Run
+  # 3. Fazer o deploy no Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
     args:
+      - 'gcloud'
       - 'run'
-      - 'deploy'
-      - 'jcevolution-app'
-      - '--image'
-      - 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA'
-      - '--region'
-      - 'southamerica-east1'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--port'
-      - '8080'
+      - 'services'
+      - 'update'
+      - 'jcevolutionengenhariams'
+      - '--image=southamerica-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/app:$COMMIT_SHA'
+      - '--region=southamerica-east1'
 
 images:
-  - 'southamerica-east1-docker.pkg.dev/project-fefc6425-3e86-4253-b76/jcevolution/app:$COMMIT_SHA'
+  - 'southamerica-east1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/app:$COMMIT_SHA'
   
