@@ -31,5 +31,5 @@ COPY --from=builder /app/database.json ./database.json
 # Expõe a porta 8080 (padrão usada no Cloud Run)
 EXPOSE 8080
 
-# Inicia o servidor
-CMD ["npm", "start"]
+# Inicia o servidor diretamente via node (evita overhead do npm e repassa sinais de sistema)
+CMD ["node", "dist/server.cjs"]

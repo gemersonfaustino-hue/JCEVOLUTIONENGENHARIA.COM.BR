@@ -41,6 +41,15 @@ if (process.env.DATABASE_PATH && !fs.existsSync(DB_PATH)) {
 
 app.use(express.json({ limit: "10mb" }));
 
+// Health check endpoints for Cloud Run and GCP load balancers
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
 // Database Access Utilities
 const BACKUP_PATH = DB_PATH + ".bak";
 
