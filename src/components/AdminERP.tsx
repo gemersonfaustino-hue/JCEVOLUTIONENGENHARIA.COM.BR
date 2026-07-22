@@ -41,6 +41,36 @@ export default function AdminERP({ transactions, serviceOrders, onAddTransaction
   const totalPayables = transactions.filter(t => t.type === "payable" && t.status === "pago").reduce((acc, t) => acc + t.value, 0);
   const netBalance = totalReceivables - totalPayables;
 
+  // Export CSV
+  const exportTransactionsCSV = () => {
+    if (!transactions || transactions.length === 0) {
+      alert("Nenhuma transação disponível para exportar.");
+      return;
+    }
+
+    const headers = ["ID", "Data", "Descrição", "Tipo", "Categoria", "Status", "Valor (R$)"];
+    const rows = transactions.map((tx) => [
+      `"${tx.id || ""}"`,
+      `"${tx.date || ""}"`,
+      `"${(tx.description || "").replace(/"/g, '""')}"`,
+      `"${tx.type === "receivable" ? "Receita" : "Despesa"}"`,
+      `"${tx.category || ""}"`,
+      `"${tx.status === "pago" ? "Pago" : "Pendente"}"`,
+      `"${tx.value.toFixed(2).replace(".", ",")}"`
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `transacoes_financeiras_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Add Transaction Form
   const handleAddTxSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,15 +203,25 @@ export default function AdminERP({ transactions, serviceOrders, onAddTransaction
 
           {/* Transactions List */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <h3 className="font-bold text-white text-sm">Extrato de Contas e Fluxo de Caixa</h3>
-              <button
-                onClick={() => setIsAddingTx(true)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1"
-              >
-                <Plus className="w-4 h-4" />
-                Registrar Lançamento
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={exportTransactionsCSV}
+                  className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5"
+                  title="Exportar lançamentos para CSV"
+                >
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  Exportar CSV
+                </button>
+                <button
+                  onClick={() => setIsAddingTx(true)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  Registrar Lançamento
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
