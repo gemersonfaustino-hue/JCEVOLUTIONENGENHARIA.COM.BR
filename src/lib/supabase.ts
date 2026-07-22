@@ -55,7 +55,15 @@ export const supabaseAnonKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTcyMTQwMDAwMCwiZXhwIjoyMDM3MDAwMDAwfQ.placeholder";
 
 // Inicializa o cliente oficial do Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const isConfigured = !supabaseAnonKey.includes("placeholder") && !supabaseUrl.includes("placeholder");
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: isConfigured,
+    autoRefreshToken: isConfigured,
+    detectSessionInUrl: false,
+  },
+});
 
 console.log(`[Supabase] Cliente inicializado.`);
 console.log(` - URL utilizada: ${supabaseUrl}`);
