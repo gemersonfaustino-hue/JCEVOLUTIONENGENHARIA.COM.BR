@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # 1. Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -27,3 +30,4 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/jcevolution-app:latest'
+
