@@ -16,7 +16,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'jc-evolution-engenharia-mecanica-art-git'
+      - 'jcevolutionengenhariams'
       - '--image'
       - 'gcr.io/$PROJECT_ID/jcevolution-app:$COMMIT_SHA'
       - '--region'
