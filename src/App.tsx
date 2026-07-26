@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Compass, Shield, Landmark, Users, LayoutDashboard, Map, Network, ArrowLeft, Bot, Sparkles, Building2, Terminal,
-  FileText, Lock, User, X, AlertCircle, Settings, Mail, Briefcase
+  FileText, Lock, User, X, AlertCircle, Settings, Mail, Briefcase, HardHat
 } from "lucide-react";
 import { Lead, Transaction, ServiceOrder, BlogPost, SiteSettings } from "./types";
 import PublicWebsite from "./components/PublicWebsite";
@@ -596,22 +596,18 @@ export default function App() {
             {/* Bottom credentials / Back to Website button - fixed at bottom */}
             <div className="p-5 border-t border-slate-800 space-y-2 text-xs bg-slate-900 shrink-0">
               <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl flex items-center gap-3">
-                <ResilientImage
-                  src={user?.role === "engineer" ? (siteSettings?.imgEngineer || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80") : undefined}
-                  fallbackSrc="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
-                  fallbackType={user?.role === "engineer" ? "engineer" : "user"}
-                  alt={user?.name || "Usuário"}
-                  containerClassName="w-10 h-10 rounded-full shrink-0 overflow-hidden border border-slate-700 bg-slate-900"
-                  className="w-full h-full object-cover"
-                  iconSize="sm"
-                  maxRetries={4}
-                  baseDelayMs={1000}
-                />
+                <div className="w-10 h-10 rounded-xl bg-[#155E54]/20 border border-[#155E54]/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-sm">
+                  {user?.role === "engineer" ? (
+                    <HardHat className="w-5 h-5 text-emerald-400" />
+                  ) : (
+                    <User className="w-5 h-5 text-teal-400" />
+                  )}
+                </div>
                 <div className="overflow-hidden">
-                  <p className="text-[10px] font-mono text-slate-500 uppercase truncate">Profissional Conectado</p>
+                  <p className="text-[10px] font-mono text-emerald-400 font-bold uppercase truncate tracking-wider">Responsável Técnico</p>
                   <p className="font-bold text-white text-[11px] truncate mt-0.5">{user?.name || "Convidado"}</p>
                   {user?.crea && (
-                    <p className="text-[9px] text-emerald-400 font-mono truncate">CREA: {user.crea}</p>
+                    <p className="text-[9px] text-slate-300 font-mono truncate">CREA: {user.crea}</p>
                   )}
                   {user?.role === "admin" && (
                     <p className="text-[9px] text-teal-400 font-mono truncate">ADMIN / DEVELOPER</p>
