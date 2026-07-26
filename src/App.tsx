@@ -19,6 +19,7 @@ import AdminBlog from "./components/AdminBlog";
 import AdminProjects from "./components/AdminProjects";
 import AdminSettings from "./components/AdminSettings";
 import JCLogo from "./components/JCLogo";
+import ResilientImage from "./components/ResilientImage";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { supabase, supabaseAnonKey } from "./lib/supabase";
 import { useToast } from "./components/Toast";
@@ -594,15 +595,28 @@ export default function App() {
 
             {/* Bottom credentials / Back to Website button - fixed at bottom */}
             <div className="p-5 border-t border-slate-800 space-y-2 text-xs bg-slate-900 shrink-0">
-              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl">
-                <p className="text-[10px] font-mono text-slate-500 uppercase">Profissional Conectado</p>
-                <p className="font-bold text-white text-[11px] mt-0.5">{user?.name || "Convidado"}</p>
-                {user?.crea && (
-                  <p className="text-[9px] text-emerald-400 font-mono">CREA: {user.crea}</p>
-                )}
-                {user?.role === "admin" && (
-                  <p className="text-[9px] text-teal-400 font-mono">ADMIN / DEVELOPER</p>
-                )}
+              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl flex items-center gap-3">
+                <ResilientImage
+                  src={user?.role === "engineer" ? (siteSettings?.imgEngineer || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80") : undefined}
+                  fallbackSrc="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
+                  fallbackType={user?.role === "engineer" ? "engineer" : "user"}
+                  alt={user?.name || "Usuário"}
+                  containerClassName="w-10 h-10 rounded-full shrink-0 overflow-hidden border border-slate-700 bg-slate-900"
+                  className="w-full h-full object-cover"
+                  iconSize="sm"
+                  maxRetries={4}
+                  baseDelayMs={1000}
+                />
+                <div className="overflow-hidden">
+                  <p className="text-[10px] font-mono text-slate-500 uppercase truncate">Profissional Conectado</p>
+                  <p className="font-bold text-white text-[11px] truncate mt-0.5">{user?.name || "Convidado"}</p>
+                  {user?.crea && (
+                    <p className="text-[9px] text-emerald-400 font-mono truncate">CREA: {user.crea}</p>
+                  )}
+                  {user?.role === "admin" && (
+                    <p className="text-[9px] text-teal-400 font-mono truncate">ADMIN / DEVELOPER</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">

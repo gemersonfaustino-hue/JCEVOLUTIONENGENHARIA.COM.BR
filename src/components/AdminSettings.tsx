@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Settings, Save, RefreshCw, Phone, Mail, FileText, MapPin, Check, Image, Sparkles, Upload, Trash2, AlertCircle, Lock, Users, UserPlus, PlusCircle, Building2 } from "lucide-react";
 import { SiteSettings } from "../types";
 import JCLogo from "./JCLogo";
+import ResilientImage from "./ResilientImage";
 import { compressImage } from "../lib/imageCompressor";
 import { useToast } from "./Toast";
 
@@ -1000,17 +1001,18 @@ export default function AdminSettings({ onSettingsSaved, user, onUserUpdate }: A
                         
                         {/* Preview */}
                         <div className="relative aspect-video bg-slate-900 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
-                          <img
+                          <ResilientImage
                             src={currentValue}
+                            fallbackSrc={img.default}
                             alt={img.label}
                             className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = img.default;
-                            }}
+                            containerClassName="w-full h-full"
+                            fallbackType={img.key === "imgEngineer" ? "engineer" : "generic"}
+                            maxRetries={4}
+                            baseDelayMs={1000}
                           />
                           {isCustom && (
-                            <span className="absolute top-1.5 right-1.5 bg-emerald-600 text-white font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-md font-bold shadow">
+                            <span className="absolute top-1.5 right-1.5 bg-emerald-600 text-white font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-md font-bold shadow z-10">
                               Personalizada
                             </span>
                           )}

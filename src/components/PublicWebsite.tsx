@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { BlogPost, Lead, SiteSettings, Project } from "../types";
 import JCLogo from "./JCLogo";
+import ResilientImage from "./ResilientImage";
 
 interface PublicWebsiteProps {
   blogPosts: BlogPost[];
@@ -706,13 +707,17 @@ Aguardando retorno.`);
                 {/* Right Column: Hero photo of engineer working */}
                 <div className="lg:col-span-5 relative flex items-center justify-center pt-8 lg:pt-0">
                   <div className="w-full relative z-10 bg-slate-900/40 backdrop-blur-md border border-slate-700/30 rounded-2xl overflow-hidden shadow-2xl p-2">
-                    <img
+                    <ResilientImage
                       src={siteSettings?.imgEngineer || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"}
+                      fallbackSrc="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
                       alt="Engenheiro JC EVOLUTION ENGENHARIA MECÂNICA"
                       className="w-full h-[320px] object-cover rounded-xl filter contrast-115 brightness-95"
-                      referrerPolicy="no-referrer"
+                      containerClassName="w-full h-[320px] rounded-xl overflow-hidden"
+                      fallbackType="engineer"
+                      maxRetries={4}
+                      baseDelayMs={1000}
                     />
-                    <div className="absolute inset-x-2 bottom-2 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent p-5 rounded-b-xl">
+                    <div className="absolute inset-x-2 bottom-2 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent p-5 rounded-b-xl z-20 pointer-events-none">
                       <p className="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">Responsável Técnico</p>
                       <p className="text-base font-bold text-white mt-1">Eng. Josnei da Cunha</p>
                       <p className="text-[10px] text-slate-300 font-mono mt-0.5">{siteSettings.crea} | CNPJ: {siteSettings.cnpj || "53.111.432/0001-36"}</p>
