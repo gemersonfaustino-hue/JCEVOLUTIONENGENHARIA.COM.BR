@@ -146,8 +146,73 @@ const DEFAULT_PROJECTS = [
   }
 ];
 
+const DEFAULT_LEADS = [
+  {
+    id: "lead-1",
+    company: "Frigorífico Alvorada Alimentos",
+    name: "Carlos Eduardo Silveira (Gerente de Manutenção)",
+    phone: "(67) 99812-4433",
+    email: "carlos.silveira@alvoradaalimentos.com.br",
+    service: "NR-13 – Inspeção de Caldeiras e Vasos de Pressão",
+    value: 12500,
+    status: "Orçamento",
+    date: "22/07/2026",
+    address: "Rodovia BR-158, Km 42 - Zona Industrial, Aparecida do Taboado - MS",
+    notes: [
+      "Solicitou proposta técnica para teste de estanqueidade e calibração de válvulas em 2 caldeiras a biomassa.",
+      "Vistoria agendada para início da próxima semana com relatório prévio de não-conformidades."
+    ]
+  },
+  {
+    id: "lead-2",
+    company: "Usina & Metalúrgica Vale do Paranaíba",
+    name: "Eng. Roberto Mendonça",
+    phone: "(67) 99234-8811",
+    email: "roberto.mendonca@paranaiba-metal.com.br",
+    service: "NR-12 – Segurança e Laudo Técnico de Máquinas",
+    value: 18900,
+    status: "Contato",
+    date: "24/07/2026",
+    address: "Av. Industrial, 1050 - Distrito Industrial, Três Lagoas - MS",
+    notes: [
+      "Adequação de 8 prensas excêntricas e tornos CNC segundo exigências de fiscalização prévia.",
+      "Interesse em fechar contrato com emissão imediata de ART de supervisão."
+    ]
+  },
+  {
+    id: "lead-3",
+    company: "Laticínios Cerrado Sul - Unidade Industrial",
+    name: "Juliana Paes (Diretora Operacional)",
+    phone: "(17) 99765-1200",
+    email: "juliana.paes@cerradosul.com.br",
+    service: "Laudo Estrutural, Pontes Rolantes e ART",
+    value: 9800,
+    status: "Lead",
+    date: "25/07/2026",
+    address: "Rua das Indústrias, 400 - Paranaíba - MS",
+    notes: [
+      "Inspeção em ponte rolante de 10 toneladas e laudo de suporte para balança rodoviária."
+    ]
+  },
+  {
+    id: "lead-4",
+    company: "Agroindustrial Santa Fé Ltda",
+    name: "Marcos Aurelio (Supervisão)",
+    phone: "(17) 99123-5544",
+    email: "marcos.aurelio@agrosantafe.com.br",
+    service: "PMOC & Inspeção de Refrigeração Industrial",
+    value: 14200,
+    status: "Contrato",
+    date: "18/07/2026",
+    address: "Estrada Municipal KM 12 - Santa Fé do Sul - SP",
+    notes: [
+      "Plano de Manutenção, Operação e Controle (PMOC) para sistema de climatização da planta."
+    ]
+  }
+];
+
 const DEFAULT_DB = {
-  leads: [],
+  leads: DEFAULT_LEADS,
   transactions: [],
   os: [],
   blogPosts: [],
@@ -189,7 +254,7 @@ function loadDb() {
 
 function ensureDbFields(parsed: any) {
   if (!parsed || typeof parsed !== "object") parsed = {};
-  if (!parsed.leads) parsed.leads = [];
+  if (!parsed.leads || parsed.leads.length === 0) parsed.leads = [...DEFAULT_LEADS];
   if (!parsed.transactions) parsed.transactions = [];
   if (!parsed.os) parsed.os = [];
   if (!parsed.blogPosts) parsed.blogPosts = [];
