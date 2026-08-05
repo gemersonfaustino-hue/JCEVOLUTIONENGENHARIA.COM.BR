@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Users, CheckCircle, ChevronRight, ArrowRight, ArrowLeft, Plus, Trash2, Edit2, FileText, Camera, Shield,
   Phone, Mail, MapPin, DollarSign, Sparkles, AlertCircle, RefreshCw, X, FilePlus, PlaySquare, Workflow,
-  Copy, MessageSquare, History
+  Copy, MessageSquare, History, Save, Check
 } from "lucide-react";
 import { Lead, ServiceOrder } from "../types";
 
@@ -27,11 +27,65 @@ export default function AdminCRM({ leads, serviceOrders = [], onAddLead, onUpdat
   const [propDeadline, setPropDeadline] = useState("10 dias úteis a partir da aprovação e vistoria");
   const [propValidity, setPropValidity] = useState("15 dias");
 
+  // Edit Lead / Budget State
+  const [isEditingLead, setIsEditingLead] = useState<boolean>(false);
+  const [editLeadData, setEditLeadData] = useState<Partial<Lead>>({});
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+
   React.useEffect(() => {
     if (selectedLead) {
       setPropValue(selectedLead.value);
+      if (!isEditingLead) {
+        setEditLeadData({
+          company: selectedLead.company,
+          name: selectedLead.name,
+          phone: selectedLead.phone,
+          email: selectedLead.email,
+          service: selectedLead.service,
+          value: selectedLead.value,
+          status: selectedLead.status,
+          address: selectedLead.address,
+        });
+      }
     }
   }, [selectedLead]);
+
+  const handleStartEditLead = (lead: Lead) => {
+    setSelectedLead(lead);
+    setEditLeadData({
+      company: lead.company,
+      name: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      service: lead.service,
+      value: lead.value,
+      status: lead.status,
+      address: lead.address,
+    });
+    setIsEditingLead(true);
+  };
+
+  const handleSaveEditLead = () => {
+    if (!selectedLead) return;
+    onUpdateLead(selectedLead.id, editLeadData);
+    const updated = { ...selectedLead, ...editLeadData };
+    setSelectedLead(updated as Lead);
+    setIsEditingLead(false);
+    if (editLeadData.value !== undefined) {
+      setPropValue(Number(editLeadData.value) || 0);
+    }
+    setSaveSuccessMessage("Informações do orçamento atualizadas com sucesso!");
+    setTimeout(() => setSaveSuccessMessage(null), 3000);
+  };
+
+  const handleSaveProposalValue = () => {
+    if (!selectedLead) return;
+    const numValue = Number(propValue) || 0;
+    onUpdateLead(selectedLead.id, { value: numValue });
+    setSelectedLead({ ...selectedLead, value: numValue });
+    setSaveSuccessMessage("Valor do orçamento atualizado no CRM com sucesso!");
+    setTimeout(() => setSaveSuccessMessage(null), 3000);
+  };
 
   const handleAddNote = () => {
     if (!newNote.trim() || !selectedLead) return;
@@ -219,22 +273,34 @@ export default function AdminCRM({ leads, serviceOrders = [], onAddLead, onUpdat
                         <span className="text-[9px] text-slate-500">{lead.service.split(" – ")[0]}</span>
                       </p>
 
-                      {/* Quick Move Funnel Buttons */}
-                      <div className="flex justify-end gap-1.5 mt-3 pt-2.5 border-t border-slate-850 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* Quick Move Funnel & Edit Buttons */}
+                      <div className="flex items-center justify-between gap-1 mt-3 pt-2.5 border-t border-slate-850 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleMoveLead(lead, "backward"); }}
-                          className="w-5 h-5 bg-slate-850 hover:bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-slate-300 text-[10px]"
-                          disabled={stage === "Lead"}
+                          onClick={(e) => { e.stopPropagation(); handleStartEditLead(lead); }}
+                          className="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-800/60 text-emerald-400 text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 transition-colors"
+                          title="Editar Orçamento e Informações"
                         >
-                          <ArrowLeft className="w-3 h-3" />
+                          <Edit2 className="w-2.5 h-2.5" />
+                          <span>Editar</span>
                         </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleMoveLead(lead, "forward"); }}
-                          className="w-5 h-5 bg-slate-850 hover:bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-slate-300 text-[10px]"
-                          disabled={stage === "Concluído"}
-                        >
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveLead(lead, "backward"); }}
+                            className="w-5 h-5 bg-slate-850 hover:bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-slate-300 text-[10px]"
+                            disabled={stage === "Lead"}
+                            title="Mover para estágio anterior"
+                          >
+                            <ArrowLeft className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveLead(lead, "forward"); }}
+                            className="w-5 h-5 bg-slate-850 hover:bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-slate-300 text-[10px]"
+                            disabled={stage === "Concluído"}
+                            title="Mover para próximo estágio"
+                          >
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -373,42 +439,190 @@ export default function AdminCRM({ leads, serviceOrders = [], onAddLead, onUpdat
                 ✕
               </button>
 
-              <div className="space-y-2 mt-4">
-                <span className={`text-[10px] font-bold font-mono px-2.5 py-1 rounded-full border uppercase inline-block ${getStageColor(selectedLead.status)}`}>
-                  {selectedLead.status}
-                </span>
-                <h3 className="font-bold text-xl text-white font-sans">{selectedLead.company}</h3>
-                <p className="text-slate-400 text-xs">Cadastrado em {selectedLead.date}</p>
+              {/* Feedback Success Toast inside Drawer */}
+              {saveSuccessMessage && (
+                <div className="bg-emerald-950/80 border border-emerald-500/50 p-3 rounded-xl flex items-center gap-2 text-emerald-300 text-xs shadow-lg mt-4 animate-fade-in">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{saveSuccessMessage}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-start mt-4">
+                <div className="space-y-1">
+                  <span className={`text-[10px] font-bold font-mono px-2.5 py-1 rounded-full border uppercase inline-block ${getStageColor(selectedLead.status)}`}>
+                    {selectedLead.status}
+                  </span>
+                  <h3 className="font-bold text-xl text-white font-sans">{selectedLead.company}</h3>
+                  <p className="text-slate-400 text-xs">Cadastrado em {selectedLead.date}</p>
+                </div>
+
+                {!isEditingLead && (
+                  <button
+                    onClick={() => handleStartEditLead(selectedLead)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shadow shadow-emerald-950"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    Editar Dados
+                  </button>
+                )}
               </div>
 
-              {/* Lead information ledger */}
-              <div className="border-t border-b border-slate-800/80 my-6 py-4 space-y-3.5 text-xs text-slate-300">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-slate-500" />
-                  <span><strong className="text-slate-400">Contato:</strong> {selectedLead.name}</span>
+              {/* Lead information ledger OR Edit Form */}
+              {isEditingLead ? (
+                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 my-6 space-y-4 text-xs">
+                  <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h4 className="font-bold text-emerald-400 flex items-center gap-1.5 text-sm">
+                      <Edit2 className="w-4 h-4" />
+                      Editar Orçamento e Informações
+                    </h4>
+                    <span className="text-[10px] text-slate-500 font-mono">ID: {selectedLead.id}</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-slate-400 font-medium block">Empresa / Condomínio *</label>
+                      <input
+                        type="text"
+                        value={editLeadData.company || ""}
+                        onChange={(e) => setEditLeadData({ ...editLeadData, company: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-400 font-medium block">Nome do Contato *</label>
+                      <input
+                        type="text"
+                        value={editLeadData.name || ""}
+                        onChange={(e) => setEditLeadData({ ...editLeadData, name: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-emerald-400 font-bold block">Valor do Orçamento (R$) *</label>
+                        <input
+                          type="number"
+                          value={editLeadData.value ?? 0}
+                          onChange={(e) => setEditLeadData({ ...editLeadData, value: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-slate-900 border border-emerald-500/50 rounded-lg py-2 px-3 text-emerald-300 font-mono font-bold text-sm focus:outline-none focus:border-emerald-400"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-medium block">Estágio no Funil</label>
+                        <select
+                          value={editLeadData.status || "Lead"}
+                          onChange={(e) => setEditLeadData({ ...editLeadData, status: e.target.value as Lead["status"] })}
+                          className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-2.5 text-white focus:outline-none focus:border-emerald-500"
+                        >
+                          {funnelStages.map((stg) => (
+                            <option key={stg} value={stg}>{stg}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-400 font-medium block">Serviço Solicitado</label>
+                      <input
+                        type="text"
+                        value={editLeadData.service || ""}
+                        onChange={(e) => setEditLeadData({ ...editLeadData, service: e.target.value })}
+                        placeholder="Ex: NR-12 – Segurança em Máquinas"
+                        className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-medium block">Telefone / WhatsApp</label>
+                        <input
+                          type="text"
+                          value={editLeadData.phone || ""}
+                          onChange={(e) => setEditLeadData({ ...editLeadData, phone: e.target.value })}
+                          className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-medium block">E-mail</label>
+                        <input
+                          type="email"
+                          value={editLeadData.email || ""}
+                          onChange={(e) => setEditLeadData({ ...editLeadData, email: e.target.value })}
+                          className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-400 font-medium block">Endereço / Local da Obra</label>
+                      <input
+                        type="text"
+                        value={editLeadData.address || ""}
+                        onChange={(e) => setEditLeadData({ ...editLeadData, address: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-750 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-3 border-t border-slate-800 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingLead(false)}
+                      className="bg-slate-800 hover:bg-slate-750 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveEditLead}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors flex items-center gap-1.5 shadow shadow-emerald-950"
+                    >
+                      <Save className="w-4 h-4" />
+                      Salvar Alterações
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-slate-500" />
-                  <span><strong className="text-slate-400">Telefone:</strong> {selectedLead.phone || "Não informado"}</span>
+              ) : (
+                <div className="border-t border-b border-slate-800/80 my-6 py-4 space-y-3.5 text-xs text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-slate-500" />
+                    <span><strong className="text-slate-400">Contato:</strong> {selectedLead.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-slate-500" />
+                    <span><strong className="text-slate-400">Telefone:</strong> {selectedLead.phone || "Não informado"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                    <span><strong className="text-slate-400">E-mail:</strong> {selectedLead.email || "Não informado"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-slate-500" />
+                    <span><strong className="text-slate-400">Local da Obra:</strong> {selectedLead.address}</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-850">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-emerald-500" />
+                      <span>
+                        <strong className="text-slate-400">Valor Proposta:</strong>{" "}
+                        <span className="text-emerald-400 font-mono font-bold text-base">
+                          R$ {selectedLead.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </span>
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleStartEditLead(selectedLead)}
+                      className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <Edit2 className="w-3 h-3" /> Alterar Valor
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-slate-500" />
-                  <span><strong className="text-slate-400">E-mail:</strong> {selectedLead.email || "Não informado"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-500" />
-                  <span><strong className="text-slate-400">Local da Obra:</strong> {selectedLead.address}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-emerald-500" />
-                  <span>
-                    <strong className="text-slate-400">Valor Proposta:</strong>{" "}
-                    <span className="text-emerald-400 font-mono font-bold text-sm">
-                      R$ {selectedLead.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </span>
-                  </span>
-                </div>
-              </div>
+              )}
 
               {/* Outreach Pitch Auto Generator Panel */}
               <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
@@ -631,42 +845,57 @@ export default function AdminCRM({ leads, serviceOrders = [], onAddLead, onUpdat
             </div>
 
             {/* Editable Fields Panel, hidden during print */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-150 text-xs print:hidden">
-              <div className="space-y-1">
-                <label className="text-slate-500 font-semibold block">Valor do Serviço (R$)</label>
-                <input
-                  type="number"
-                  value={propValue}
-                  onChange={(e) => setPropValue(parseFloat(e.target.value) || 0)}
-                  className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 font-semibold font-mono text-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-slate-500 font-semibold block">Condições de Pagamento</label>
-                <input
-                  type="text"
-                  value={propPayment}
-                  onChange={(e) => setPropPayment(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-slate-500 font-semibold block">Validade</label>
-                <input
-                  type="text"
-                  value={propValidity}
-                  onChange={(e) => setPropValidity(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div className="space-y-1 md:col-span-4">
-                <label className="text-slate-500 font-semibold block">Prazo de Execução</label>
-                <input
-                  type="text"
-                  value={propDeadline}
-                  onChange={(e) => setPropDeadline(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
-                />
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 text-xs space-y-3 print:hidden">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="text-slate-700 font-bold block">Valor do Serviço (R$)</label>
+                  </div>
+                  <div className="flex gap-1">
+                    <input
+                      type="number"
+                      value={propValue}
+                      onChange={(e) => setPropValue(parseFloat(e.target.value) || 0)}
+                      className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 font-semibold font-mono text-slate-900 focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveProposalValue}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0 transition-colors"
+                      title="Atualizar valor no CRM"
+                    >
+                      <Save className="w-3 h-3" />
+                      Salvar
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-slate-500 font-semibold block">Condições de Pagamento</label>
+                  <input
+                    type="text"
+                    value={propPayment}
+                    onChange={(e) => setPropPayment(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-slate-500 font-semibold block">Validade</label>
+                  <input
+                    type="text"
+                    value={propValidity}
+                    onChange={(e) => setPropValidity(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-4">
+                  <label className="text-slate-500 font-semibold block">Prazo de Execução</label>
+                  <input
+                    type="text"
+                    value={propDeadline}
+                    onChange={(e) => setPropDeadline(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-3 text-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
             </div>
 
