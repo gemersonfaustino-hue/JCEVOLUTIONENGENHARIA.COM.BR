@@ -58,7 +58,7 @@ const DEFAULT_SITE_SETTINGS = {
   logoText: "JC EVOLUTION",
   logoSubtext: "MECÂNICA",
   logoSlogan: "Laudos, Inspeções e Soluções em Engenharia Mecânica",
-  customLogoUrl: "",
+  customLogoUrl: "/jc_logo.jpg",
   phone: "(49) 99832-5358",
   email: "josnei.cunha@gmail.com",
   crea: "CREA/RN 2521304182",
@@ -292,7 +292,7 @@ function loadDbFromDisk() {
         isDatabaseHealthy = true;
         return ensureDbFields(parsed);
       } catch (parseError: any) {
-        console.error("Erro crítico: database.json está corrompido (SyntaxError). Tentando reparar...", parseError);
+        console.warn("Aviso: database.json com inconsistência de formatação. Tentando auto-reparação...", parseError?.message || parseError);
         
         // Tenta reparar com jsonrepair
         try {
@@ -303,7 +303,7 @@ function loadDbFromDisk() {
           isDatabaseHealthy = true;
           return ensureDbFields(parsed);
         } catch (repairError) {
-          console.error("Falha ao reparar database.json:", repairError);
+          console.warn("Falha ao reparar com jsonrepair:", repairError);
         }
 
         // Tenta recuperar do backup
@@ -317,7 +317,7 @@ function loadDbFromDisk() {
             isDatabaseHealthy = true;
             return ensureDbFields(parsed);
           } catch (backupErr) {
-            console.error("Backup também corrompido ou ilegível:", backupErr);
+            console.warn("Backup também necessita de reparo:", backupErr);
             // Tenta reparar o backup
             try {
               const backupData = fs.readFileSync(BACKUP_PATH, "utf8");
@@ -330,12 +330,13 @@ function loadDbFromDisk() {
               isDatabaseHealthy = true;
               return ensureDbFields(parsed);
             } catch (repairBackupError) {
-              console.error("Falha crítica ao reparar o backup:", repairBackupError);
+              console.warn("Falha ao reparar o backup:", repairBackupError);
             }
           }
         }
 
         // Se ambos estiverem corrompidos e irreparáveis, move o arquivo corrompido e inicia limpo
+        console.error("Erro crítico: database.json e backup estão corrompidos e foram movidos.");
         const corruptedPath = DB_PATH + `.corrupted-${Date.now()}`;
         try {
           fs.renameSync(DB_PATH, corruptedPath);
@@ -920,6 +921,27 @@ app.get("/api/projects", (req, res) => {
   res.json(db.projects || []);
 });
 
+function sanitizeProjectImage(img: any): string {
+  const fallback = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80";
+  if (typeof img !== "string" || !img.trim()) return fallback;
+  const trimmed = img.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("/")) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("data:image/")) {
+    const commaIndex = trimmed.indexOf(",");
+    if (commaIndex === -1) return fallback;
+    const base64Data = trimmed.slice(commaIndex + 1);
+    // Base64 must only contain valid base64 chars (no unescaped quotes or raw control chars)
+    if (!/^[A-Za-z0-9+/=\s]+$/.test(base64Data)) {
+      console.warn("Base64 de imagem inválido recebido em projetos. Revertendo para imagem segura.");
+      return fallback;
+    }
+    return trimmed;
+  }
+  return fallback;
+}
+
 app.post("/api/projects", (req, res) => {
   const db = loadDb();
   if (!db.projects) db.projects = [];
@@ -931,7 +953,7 @@ app.post("/api/projects", (req, res) => {
     category: req.body.category || "Geral",
     location: req.body.location || "",
     date: req.body.date || "",
-    image: req.body.image || "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80",
+    image: sanitizeProjectImage(req.body.image),
     description: req.body.description || "",
     tags: Array.isArray(req.body.tags) ? req.body.tags : []
   };
@@ -954,7 +976,7 @@ app.put("/api/projects/:id", (req, res) => {
       category: req.body.category !== undefined ? req.body.category : db.projects[index].category,
       location: req.body.location !== undefined ? req.body.location : db.projects[index].location,
       date: req.body.date !== undefined ? req.body.date : db.projects[index].date,
-      image: req.body.image !== undefined ? req.body.image : db.projects[index].image,
+      image: req.body.image !== undefined ? sanitizeProjectImage(req.body.image) : db.projects[index].image,
       description: req.body.description !== undefined ? req.body.description : db.projects[index].description,
       tags: Array.isArray(req.body.tags) ? req.body.tags : db.projects[index].tags
     };

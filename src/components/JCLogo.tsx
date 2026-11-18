@@ -1,6 +1,8 @@
 import React from "react";
 import { FileText } from "lucide-react";
 
+const DEFAULT_LOGO_URL = "/jc_logo.jpg";
+
 interface JCLogoProps {
   type?: string;
   customLogoUrl?: string;
@@ -28,6 +30,8 @@ export default function JCLogo({
   const textClass = isDarkText ? "text-[#0D2B4D]" : "text-white";
   const subtextClass = isDarkText ? "text-[#155E54] font-bold" : "text-emerald-400 font-black";
   const lineClass = isDarkText ? "bg-[#155E54]" : "bg-emerald-500";
+  const activeLogoSrc = customLogoUrl || DEFAULT_LOGO_URL;
+
   if (type === "Custom Image" && customLogoUrl) {
     const isPdf = customLogoUrl.startsWith("data:application/pdf") || customLogoUrl.toLowerCase().endsWith(".pdf");
 
@@ -65,14 +69,13 @@ export default function JCLogo({
       <div className="flex items-center gap-3">
         <div className={`${bgClasses} border p-1 rounded-md shrink-0 flex items-center justify-center overflow-hidden`} style={{ width: "3.5rem", height: "3.5rem" }}>
           <img
-            src={customLogoUrl}
-            alt="JC Logo"
+            src={activeLogoSrc}
+            alt={logoText || "JC Logo"}
             className="object-contain rounded-sm max-w-full max-h-full"
             style={{ transform: `scale(${(logoScale || 100) / 100})`, transformOrigin: "center", width: "100%", height: "100%" }}
             referrerPolicy="no-referrer"
             onError={(e) => {
-              // fallback if URL fails
-              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&auto=format&fit=crop&q=60";
+              (e.target as HTMLImageElement).src = "/jc_logo.jpg";
             }}
           />
         </div>
@@ -111,67 +114,23 @@ export default function JCLogo({
     );
   }
 
-  // DEFAULT: "Flyer Gear" - Styled matching the physical flyer
+  // DEFAULT & "Flyer Gear": High-Resolution 3D Metallic JC Evolution Logo Emblem
   return (
     <div className="flex items-center gap-3 select-none">
-      <div className={`relative ${className} shrink-0`}>
-        <svg
-          viewBox="0 0 100 100"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
-        >
-          {/* Subtle glow / shadow background layer for a premium look */}
-          <circle cx="50" cy="50" r="48" fill="rgba(16, 185, 129, 0.02)" />
-
-          {/* Left Gear (Teal/Emerald and White) */}
-          <g className="text-emerald-500">
-            {/* Gear body ring */}
-            <circle cx="33" cy="50" r="22" stroke="currentColor" strokeWidth="5.5" />
-            <circle cx="33" cy="50" r="14" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3,3" className="opacity-60" />
-            
-            {/* Thick professional gear teeth (trapezoidal/rectangular) */}
-            {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-              <path
-                key={angle}
-                d="M 33 24 L 33 16"
-                stroke="currentColor"
-                strokeWidth="7"
-                strokeLinecap="butt"
-                transform={`rotate(${angle} 33 50)`}
-              />
-            ))}
-          </g>
-
-          {/* Elegant Lowercase 'j' with mint/emerald shadow/offset as in the high-res screenshot */}
-          {/* Background offset/outline of J (emerald-400) */}
-          <path
-            d="M 52 24 L 62 24 L 62 64 C 62 73 56 78 47 78 C 42 78 37 76 34 72 L 40 66 C 42 68 44 70 47 70 C 51 70 53 68 53 64 L 53 32 L 48 32 L 48 24 Z"
-            fill="#10b981"
-            transform="translate(-1, 1)"
-            className="opacity-90"
-          />
-          {/* Main White Body of J */}
-          <path
-            d="M 52 24 L 62 24 L 62 64 C 62 73 56 78 47 78 C 42 78 37 76 34 72 L 40 66 C 42 68 44 70 47 70 C 51 70 53 68 53 64 L 53 32 L 48 32 L 48 24 Z"
-            fill={primaryColor}
-          />
-
-          {/* Elegant 'C' on the right side */}
-          {/* C Body: Outer Arc and Inner Arc */}
-          <path
-            d="M 83 36 C 79 30 72 26 63 26 C 49 26 39 37 39 51 C 39 65 49 76 63 76 C 72 76 79 72 83 66 L 76 60 C 73 64 69 67 63 67 C 54 67 48 60 48 51 C 48 42 54 35 63 35 C 69 35 73 38 76 42 Z"
-            fill={primaryColor}
-          />
-
-          {/* Technical target crosshair overlay inside the 'C' center (centered around 63, 51) */}
-          <circle cx="63" cy="51" r="13" stroke={primaryColor} strokeWidth="1.5" />
-          <circle cx="63" cy="51" r="4.5" stroke={primaryColor} strokeWidth="1.2" />
-          <line x1="46" y1="51" x2="80" y2="51" stroke={primaryColor} strokeWidth="1.2" />
-          <line x1="63" y1="34" x2="63" y2="68" stroke={primaryColor} strokeWidth="1.2" />
-          {/* Center tiny square target mark */}
-          <rect x="62" y="50" width="2" height="2" fill="#10b981" />
-        </svg>
+      <div className={`relative ${className} shrink-0 flex items-center justify-center overflow-hidden`}>
+        <img
+          src={activeLogoSrc}
+          alt={logoText || "JC Evolution Engenharia Mecânica"}
+          className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.16)] transition-transform duration-200 hover:scale-105"
+          style={{
+            transform: logoScale && logoScale !== 100 ? `scale(${logoScale / 100})` : undefined,
+            transformOrigin: "center"
+          }}
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/jc_logo.jpg";
+          }}
+        />
       </div>
 
       {showText && (
